@@ -24,13 +24,16 @@ import urllib
 import urllib2
 import time
 import dev_key
+import random
+import feedparser
+
 
 network = "irc.freenode.net"
 port = 6667
 channels = ['#mctest']
 nick = 'kittybot2'
 name = "secretly a goose"
-
+\
 
 
 #this is super hacky, find a way to fix it
@@ -45,6 +48,33 @@ def shorten(url):
     req.add_header('User-Agent', 'toolbar')
     results = json.load(urllib2.urlopen(req))
     return results['short_url']
+
+# RSS related things
+def getitem(url, rickroll):
+    feed = feedparser.parse(url)
+    choice = random.randint(0, len(feed)-1)
+    toreturn = "%s " % feed['entries'][choice]['title']
+    if rickroll:
+        #rickroll
+        toreturn = toreturn + shorten("http://www.youtube.com/watch?v=oHg5SJYRHA0")
+    else:
+        toreturn = toreturn + shorten(feed['entries'][choice]['link'])
+    return toreturn
+
+def flickr(tag):
+    rickroll = False
+    if random.randint(0,9) == 9:
+        rickroll = True
+    return getitem("http://api.flickr.com/services/feeds/photos_public.gne?tags=%s&lang=en-us&format=rss_200" % tag, rickroll)
+
+def wtf():
+    choices = ['http://strangeweirdporn.com/feed/', 'http://www.scarysextoyfriday.com/feeds/posts/default', 'http://www.efukt.com/rss.php', 'http://fuckeduppornsites.com/feed/']
+    rickroll = False
+    if random.randint(0,9) == 9:
+        rickroll = True    
+    return getitem(choices[random.randint(0, len(choices) -1)], rickroll)
+
+# IRC related things
 
 def debug(connection, event):
     print('---------Event')
@@ -63,13 +93,25 @@ def pubmsg(connection, event):
     if m is not None:
         reply = event.target()
         a = connection.whois([m.group(1)])
-        
+    else:
+        reply = parse(message)
+        if reply != "":
+            say(reply)
         
 def privmsg(connection, event):
     print("it's a private msg!")
 
-def parse():
-    return "parsed!"
+def parse(msg):
+    m = re.match('!wtf', msg)
+    if m is not None:
+        return wtf()
+    m = re.match('!kitty', msg)
+    if m is not None:
+        return flickr('kitty')
+    m = re.match('!tag (\\w+)', msg)
+    if m is not None:
+        return flickr(m.group(1))
+    return ""
 
 def handlewho(connection, event):
     print("whois handler")
