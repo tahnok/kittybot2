@@ -18,5 +18,3 @@ def shorten(url):
         toreturn = result['id']
     conn.close()
     return toreturn
-
-print(shorten("http://docs.python.org/library/httplib.html"))
