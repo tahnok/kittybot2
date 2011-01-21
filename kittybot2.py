@@ -16,6 +16,8 @@ HOWTO:
 
 TODO: random kitties every hour
 TODO: geohash!
+TODO: bounce!
+TODO: fix weather to take cities and farhenhite
 """
 
 import irclib
@@ -28,13 +30,23 @@ import dev_key
 import random
 import feedparser
 import urlshortener
+import BeautifulSoup
 
 network = "irc.freenode.net"
 port = 6667
-channels = ['#mctest']
+channels = ['#mcgill']
 nick = 'kittybot2'
 name = "secretly a goose"
 
+#regexes
+kittyre = re.compile('!kitty')
+weatherre = re.compile('!weather')
+fweatherre = re.compile('!thefuckingweather$')
+fweatherre2 = re.compile('thefuckingweather ([\\w ]+)')
+#fweatherre3 = re.compile('!thefuckingweather (\\wf+) (f)$')
+locatere = re.compile('!locate ([\x5b-\x60\x7b-\x7d]|[\\w-]+$)')
+tagre = re.compile('!tag (\\w+)')
+wtfre = re.compile('!wtf')
 
 #this is super hacky, find a way to fix it
 reply = "Not Set"
@@ -49,7 +61,7 @@ def getitem(url, rickroll):
         toreturn = toreturn + urlshortener.shorten("http://www.youtube.com/watch?v=oHg5SJYRHA0")
     else:
         toreturn = toreturn + urlshortener.shorten(feed['entries'][choice]['link'])
-    return toreturn
+    return removeNonAscii(toreturn)
 
 def flickr(tag):
     rickroll = False
@@ -71,6 +83,14 @@ def weather():
     result = result + ". Bitches"
     return result.replace(u'\xb0', ' ')
 
+def fuckingweather(location="montreal", celcius="yes"):
+    data = urllib.urlopen('http://thefuckingweather.com/?zipcode=%s&CELSIUS=%s' % (location, celcius))
+    soup = BeautifulSoup.BeautifulSoup(data.read())
+    result = soup.find('div', 'large')
+    return result.contents[0].replace("&deg;", " ") + " " + result.contents[4]
+    
+def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
+
 # IRC related things
 
 def debug(connection, event):
@@ -85,7 +105,7 @@ def pubmsg(connection, event):
     def say(msg):
         connection.privmsg(event.target(), msg)
     message = event.arguments()[0]
-    m = re.match('!locate ([\x5b-\x60\x7b-\x7d]|[\\w-]+$)',message)
+    m = locatere.match(message)
     if m is not None:
         reply = event.target()
         a = connection.whois([m.group(1)])
@@ -98,18 +118,20 @@ def privmsg(connection, event):
     print("it's a private msg!")
 
 def parse(msg):
-    m = re.match('!wtf', msg)
-    if m is not None:
+    if wtfre.match(msg) is not None:
         return wtf()
-    m = re.match('!kitty', msg)
-    if m is not None:
+    if kittyre.match(msg) is not None:
         return flickr('kitty')
-    m = re.match('!tag (\\w+)', msg)
+    m = tagre.match(msg)
     if m is not None:
         return flickr(m.group(1))
-    m = re.match('!weather', msg)
-    if m is not None:
+    if weatherre.match(msg) is not None:
         return weather()
+    if fweatherre.match(msg) is not None:
+        return fuckingweather()
+    m = fweatherre2.match(msg)
+    if m is not None:
+        return fuckingweather(m.group(1))
     return ""
 
 def handlewho(connection, event):
@@ -141,7 +163,9 @@ def main ():
     server.connect(network, port, nick, ircname=name)
     for channel in channels:
         server.join(channel)
-        server.privmsg(channel, flickr('kitty'))
+        tosend = flickr('kitty')
+        print(tosend)
+        server.privmsg(channel, tosend)
     irc.process_forever()
 
 
