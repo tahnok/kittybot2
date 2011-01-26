@@ -1,23 +1,13 @@
-
 """
 This is kittybot v2.0, now in Python!
-Requires lxml to run (just sudo apt-get install python-lxml
 
-Code is released under a license I have yet to determine
-
-Thanks to Corey Goldberg for the shorten code
-
-HOWTO:
-1. set network, channels, nick, name
-2. get a developer key from http://www.ipinfodb.com/
-3. paste it into the dev_key file as key
-4. ???
-5. Profit!
+Code is released under GPLv3. See the file named copying for more details
 
 TODO: random kitties every hour
 TODO: geohash!
 TODO: bounce!
 TODO: fix weather to take cities and farhenhite
+TODO: mouthpiece mode
 """
 
 import irclib
@@ -37,6 +27,8 @@ port = 6667
 channels = ['#mcgill']
 nick = 'kittybot2'
 name = "secretly a goose"
+
+halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name for flickr], !locate [username]"""
 
 #regexes
 kittyre = re.compile('!kitty')
@@ -104,11 +96,21 @@ def pubmsg(connection, event):
     global reply
     def say(msg):
         connection.privmsg(event.target(), msg)
+    #This is where the parsing / magic happens
     message = event.arguments()[0]
     m = locatere.match(message)
     if m is not None:
         reply = event.target()
         a = connection.whois([m.group(1)])
+    elif message == "!halp":
+        connection.privmsg(irclib.nm_to_n(event.source()), halp)
+    elif message == "!kthxbai":
+        print "bai"
+        if event.source() == "tahnok!~tahnok@unaffiliated/tahnok":
+            say("going to sleep now")
+            say("bai")
+            connection.quit()
+            exit()
     else:
         reply = parse(message)
         if reply != "":

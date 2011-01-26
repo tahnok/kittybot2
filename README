@@ -1,13 +1,22 @@
 This is kittybot v2.0, now in Python!
-Requires lxml to run (just sudo apt-get install python-lxml
 
-Code is released under a license I have yet to determine
+License, GPLv3. See the file named copying for more details.
 
-Thanks to Corey Goldberg for the shorten code
+Author WESLEY ELLIS (tahnok@gmail.com)
+
+Requires:
+ * lxml
+ * beautifulsoup
+ * irclib
+ * feedparser
+
+On ubuntu (probably debian distros too)
+	sudo apt-get install python-irclib python-beautifulsoup python-irclib python-lxml 
 
 HOWTO:
 1. set network, channels, nick, name
 2. get a developer key from http://www.ipinfodb.com/
-3. paste it into the dev_key file as key
+3. get a developer key from google for the url shortener
+3. paste the keys into the dev_key.py filefk
 4. ???
 5. Profit!
