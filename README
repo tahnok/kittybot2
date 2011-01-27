@@ -17,6 +17,7 @@ HOWTO:
 1. set network, channels, nick, name
 2. get a developer key from http://www.ipinfodb.com/
 3. get a developer key from google for the url shortener
-3. paste the keys into the dev_key.py filefk
-4. ???
-5. Profit!
+3. paste the keys into the dev_key.py filef
+4. Optionally setup a nickserv password if you have registered a nick
+5. ???
+6. Profit!

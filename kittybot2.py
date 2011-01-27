@@ -24,12 +24,11 @@ import BeautifulSoup
 
 network = "irc.freenode.net"
 port = 6667
-channels = ['#mcgill']
+channels = ['#mctest']
 nick = 'kittybot2'
 name = "secretly a goose"
 owner = "tahnok!~tahnok@unaffiliated/tahnok"
 freenode = True
-nickpwd = "supersecret"
 
 halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name for flickr], !locate [username]"""
 
@@ -86,6 +85,23 @@ def fuckingweather(location="montreal", celcius="yes"):
         return result.contents[0].replace("&deg;", " ") + " " + result.contents[4]
     else:
         return "Oww.. my poor kitty brain"
+
+def parse(msg):
+    if wtfre.match(msg) is not None:
+        return wtf()
+    if kittyre.match(msg) is not None:
+        return flickr('kitty')
+    m = tagre.match(msg)
+    if m is not None:
+        return flickr(m.group(1))
+    if weatherre.match(msg) is not None:
+        return weather()
+    if fweatherre.match(msg) is not None:
+        return fuckingweather()
+    m = fweatherre2.match(msg)
+    if m is not None:
+        return fuckingweather(m.group(1))
+    return ""
     
 def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 
@@ -117,6 +133,8 @@ def pubmsg(connection, event):
             say("bai")
             connection.quit()
             exit()
+        else:
+            say("har har nice try")
     else:
         reply = parse(message)
         if reply != "":
@@ -126,22 +144,8 @@ def privmsg(connection, event):
     print("it's a private msg!")
     connection.privmsg(event.target, parse(event.arguments()[0]))
 
-def parse(msg):
-    if wtfre.match(msg) is not None:
-        return wtf()
-    if kittyre.match(msg) is not None:
-        return flickr('kitty')
-    m = tagre.match(msg)
-    if m is not None:
-        return flickr(m.group(1))
-    if weatherre.match(msg) is not None:
-        return weather()
-    if fweatherre.match(msg) is not None:
-        return fuckingweather()
-    m = fweatherre2.match(msg)
-    if m is not None:
-        return fuckingweather(m.group(1))
-    return ""
+def bounce(connection, event):
+    connection.join(event.target())
 
 def handlewho(connection, event):
     print("whois handler")
@@ -168,10 +172,11 @@ def main ():
     irc.add_global_handler('privmsg', privmsg)
     irc.add_global_handler('pubmsg', pubmsg)
     irc.add_global_handler('whoisuser', handlewho)
+    irc.add_global_handler('kick', bounce)
     server = irc.server()
     server.connect(network, port, nick, ircname=name)
     if freenode:
-        server.privmsg("NickServ", "identify " + nickpwd)
+        server.privmsg("NickServ", "identify " + dev_key.nickservpwd)
     for channel in channels:
         server.join(channel)
         tosend = flickr('kitty')

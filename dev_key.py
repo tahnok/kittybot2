@@ -1,3 +1,5 @@
 ipinfodbkey = ''
 
 googlekey = ''
+
+nickservpwed = ''
