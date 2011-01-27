@@ -1,5 +1,0 @@
-ipinfodbkey = ''
-
-googlekey = ''
-
-nickservpwed = ''

@@ -5,7 +5,6 @@ Code is released under GPLv3. See the file named copying for more details
 
 TODO: random kitties every hour
 TODO: geohash!
-TODO: bounce!
 TODO: fix weather to take farhenhite
 TODO: mouthpiece mode
 """
@@ -16,19 +15,11 @@ import socket
 from lxml import etree
 import urllib
 import time
-import dev_key
+from config import *
 import random
 import feedparser
 import urlshortener
 import BeautifulSoup
-
-network = "irc.freenode.net"
-port = 6667
-channels = ['#mctest']
-nick = 'kittybot2'
-name = "secretly a goose"
-owner = "tahnok!~tahnok@unaffiliated/tahnok"
-freenode = True
 
 halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name for flickr], !locate [username]"""
 
@@ -158,7 +149,7 @@ def handlewho(connection, event):
         m = re.match('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$', ip) 
         if m is None:
             ip = socket.gethostbyname(ip)
-        root = etree.parse('http://api.ipinfodb.com/v2/ip_query.php?key=' + dev_key.ipinfodbkey + '&ip=' + ip + '&timezone=false').getroot()
+        root = etree.parse('http://api.ipinfodb.com/v2/ip_query.php?key=' + ipinfodbkey + '&ip=' + ip + '&timezone=false').getroot()
         lon = root.find("Longitude").text
         lat = root.find("Latitude").text
         city = root.find("City").text
@@ -176,7 +167,7 @@ def main ():
     server = irc.server()
     server.connect(network, port, nick, ircname=name)
     if freenode:
-        server.privmsg("NickServ", "identify " + dev_key.nickservpwd)
+        server.privmsg("NickServ", "identify " + nickservpwd)
     for channel in channels:
         server.join(channel)
         tosend = flickr('kitty')

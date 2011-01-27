@@ -1,9 +1,9 @@
-import dev_key
+import config
 import json
 import httplib
 
 baseurl = "www.googleapis.com"
-bodyurl = "/urlshortener/v1/url?key=" + dev_key.googlekey
+bodyurl = "/urlshortener/v1/url?key=" + config.googlekey
 headers = {"Content-Type": "application/json"}
 
 def shorten(url):
