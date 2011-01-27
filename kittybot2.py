@@ -6,7 +6,7 @@ Code is released under GPLv3. See the file named copying for more details
 TODO: random kitties every hour
 TODO: geohash!
 TODO: bounce!
-TODO: fix weather to take cities and farhenhite
+TODO: fix weather to take farhenhite
 TODO: mouthpiece mode
 """
 
@@ -27,6 +27,9 @@ port = 6667
 channels = ['#mcgill']
 nick = 'kittybot2'
 name = "secretly a goose"
+owner = "tahnok!~tahnok@unaffiliated/tahnok"
+freenode = True
+nickpwd = "supersecret"
 
 halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name for flickr], !locate [username]"""
 
@@ -34,7 +37,7 @@ halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name
 kittyre = re.compile('!kitty')
 weatherre = re.compile('!weather')
 fweatherre = re.compile('!thefuckingweather$')
-fweatherre2 = re.compile('thefuckingweather ([\\w ]+)')
+fweatherre2 = re.compile('!thefuckingweather ([\\w ]+)')
 #fweatherre3 = re.compile('!thefuckingweather (\\wf+) (f)$')
 locatere = re.compile('!locate ([\x5b-\x60\x7b-\x7d]|[\\w-]+$)')
 tagre = re.compile('!tag (\\w+)')
@@ -79,7 +82,10 @@ def fuckingweather(location="montreal", celcius="yes"):
     data = urllib.urlopen('http://thefuckingweather.com/?zipcode=%s&CELSIUS=%s' % (location, celcius))
     soup = BeautifulSoup.BeautifulSoup(data.read())
     result = soup.find('div', 'large')
-    return result.contents[0].replace("&deg;", " ") + " " + result.contents[4]
+    if result is not None:
+        return result.contents[0].replace("&deg;", " ") + " " + result.contents[4]
+    else:
+        return "Oww.. my poor kitty brain"
     
 def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
 
@@ -106,7 +112,7 @@ def pubmsg(connection, event):
         connection.privmsg(irclib.nm_to_n(event.source()), halp)
     elif message == "!kthxbai":
         print "bai"
-        if event.source() == "tahnok!~tahnok@unaffiliated/tahnok":
+        if event.source() == owner:
             say("going to sleep now")
             say("bai")
             connection.quit()
@@ -118,6 +124,7 @@ def pubmsg(connection, event):
         
 def privmsg(connection, event):
     print("it's a private msg!")
+    connection.privmsg(event.target, parse(event.arguments()[0]))
 
 def parse(msg):
     if wtfre.match(msg) is not None:
@@ -163,6 +170,8 @@ def main ():
     irc.add_global_handler('whoisuser', handlewho)
     server = irc.server()
     server.connect(network, port, nick, ircname=name)
+    if freenode:
+        server.privmsg("NickServ", "identify " + nickpwd)
     for channel in channels:
         server.join(channel)
         tosend = flickr('kitty')
