@@ -21,7 +21,7 @@ import feedparser
 import urlshortener
 import BeautifulSoup
 
-halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name for flickr], !locate [username]"""
+halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name for flickr], !locate [username]. Check out my source code at https://github.com/tahnok/kittybot2"""
 
 #regexes
 kittyre = re.compile('!kitty')
@@ -32,6 +32,7 @@ fweatherre2 = re.compile('!thefuckingweather ([\\w ]+)')
 locatere = re.compile('!locate ([\x5b-\x60\x7b-\x7d]|[\\w-]+$)')
 tagre = re.compile('!tag (\\w+)')
 wtfre = re.compile('!wtf')
+geore = re.compile('~geohash')
 
 #this is super hacky, find a way to fix it
 reply = "Not Set"
@@ -71,11 +72,15 @@ def weather():
 def fuckingweather(location="montreal", celcius="yes"):
     data = urllib.urlopen('http://thefuckingweather.com/?zipcode=%s&CELSIUS=%s' % (location, celcius))
     soup = BeautifulSoup.BeautifulSoup(data.read())
+    data.close()
     result = soup.find('div', 'large')
     if result is not None:
         return result.contents[0].replace("&deg;", " ") + " " + result.contents[4]
     else:
         return "Oww.. my poor kitty brain"
+
+def geohash():
+    
 
 def parse(msg):
     if wtfre.match(msg) is not None:
@@ -92,6 +97,9 @@ def parse(msg):
     m = fweatherre2.match(msg)
     if m is not None:
         return fuckingweather(m.group(1))
+    m = geore.match(msg)
+    if m is not None:
+        return geohash()
     return ""
     
 def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
