@@ -80,9 +80,6 @@ def fuckingweather(location="montreal", celcius="yes"):
     else:
         return "Oww.. my poor kitty brain"
 
-def geohash():
-    
-
 def parse(msg):
     if wtfre.match(msg) is not None:
         return wtf()
