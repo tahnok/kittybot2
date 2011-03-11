@@ -25,6 +25,7 @@ halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name
 
 #regexes
 kittyre = re.compile('!kitty')
+kittensre = re.compile('!KITTENS')
 weatherre = re.compile('!weather')
 fweatherre = re.compile('!thefuckingweather$')
 fweatherre2 = re.compile('!thefuckingweather ([\\w ]+)')
@@ -86,6 +87,8 @@ def parse(msg):
     if wtfre.match(msg) is not None:
         return wtf()
     if kittyre.match(msg) is not None:
+        return flickr('kitty')
+    if kittensre.match(msg) is not None:
         return flickr('kitty')
     m = tagre.match(msg)
     if m is not None:
