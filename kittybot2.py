@@ -20,6 +20,8 @@ import random
 import feedparser
 import urlshortener
 import BeautifulSoup
+import rss
+
 
 halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name for flickr], !locate [username]. Check out my source code at https://github.com/tahnok/kittybot2"""
 
@@ -37,18 +39,6 @@ geore = re.compile('~geohash')
 
 #this is super hacky, find a way to fix it
 reply = "Not Set"
-
-# RSS related things
-def getitem(url, rickroll):
-    feed = feedparser.parse(url)
-    choice = random.randint(0, len(feed)-1)
-    toreturn = "%s " % feed['entries'][choice]['title']
-    if rickroll:
-        #rickroll
-        toreturn = toreturn + urlshortener.shorten("http://www.youtube.com/watch?v=oHg5SJYRHA0")
-    else:
-        toreturn = toreturn + urlshortener.shorten(feed['entries'][choice]['link'])
-    return removeNonAscii(toreturn)
 
 def flickr(tag):
     rickroll = False

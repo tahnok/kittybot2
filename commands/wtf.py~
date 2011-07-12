@@ -1,0 +1,21 @@
+from command import Command
+import re
+
+
+class wtf(Command):
+    """returns weird freaky shit"""
+    def __init__(self):
+        self.regex = re.compile('!wtf')
+
+    def execute(self, message, sender, connection):
+        if self.re.match(message):
+            return wtf()
+        else:
+            return None
+
+    def wtf():
+        choices = ['http://strangeweirdporn.com/feed/', 'http://www.scarysextoyfriday.com/feeds/posts/default', 'http://www.efukt.com/rss.php', 'http://fuckeduppornsites.com/feed/']
+        rickroll = False
+        if random.randint(0,9) == 9:
+            rickroll = True    
+        return getitem(choices[random.randint(0, len(choices) -1)], rickroll

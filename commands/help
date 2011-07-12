@@ -1,0 +1,1 @@
+commands is a package containing different command modules. If you want to try this create a class based on the one located in __init__.py and implement the execute method. Additionally you should create an instance of your class and append it to commands.registered. For a sample please see weather.py as it is relatively simple but very functional.
