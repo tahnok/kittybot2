@@ -1,6 +1,7 @@
 import rss
 import commands
 import re
+import random
 
 class flickr(commands.Command):
 
@@ -10,14 +11,16 @@ class flickr(commands.Command):
         self.kittensre = re.compile('!KITTENS')
 
     def execute(self, message, sender=None, conncetion=None):
-        if self.kittyre.match(message):
-            return flickr('kitty')
-        m = self.regex.match(message)
+        if self.kittyre.match(message) or self.kittensre.match(message):
+            return self.flickr('kitty')
+        m = self.tagre.match(message)
         if m is not None:
-            return flickr(m.group(1))
+            return self.flickr(m.group(1))
 
-    def flickr(tag):
+    def flickr(self, tag):
         rickroll = False
         if random.randint(0,9) == 9:
             rickroll = True
-        return getitem("http://api.flickr.com/services/feeds/photos_public.gne?tags=%s&lang=en-us&format=rss_200" % tag, rickroll)
+        return rss.getitem("http://api.flickr.com/services/feeds/photos_public.gne?tags=%s&lang=en-us&format=rss_200" % tag, rickroll)
+
+commands.registered.append(flickr())

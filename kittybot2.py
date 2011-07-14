@@ -20,79 +20,25 @@ import random
 import feedparser
 import urlshortener
 import BeautifulSoup
-import rss
+
+import commands
 
 
 halp = """you can try !weather, !thefuckingweather, !wtf, !kitty, !tag [tag name for flickr], !locate [username]. Check out my source code at https://github.com/tahnok/kittybot2"""
 
 #regexes
-kittyre = re.compile('!kitty')
-kittensre = re.compile('!KITTENS')
-weatherre = re.compile('!weather')
-fweatherre = re.compile('!thefuckingweather$')
-fweatherre2 = re.compile('!thefuckingweather ([\\w ]+)')
-#fweatherre3 = re.compile('!thefuckingweather (\\wf+) (f)$')
 locatere = re.compile('!locate ([\x5b-\x60\x7b-\x7d]|[\\w-]+$)')
-tagre = re.compile('!tag (\\w+)')
-wtfre = re.compile('!wtf')
-geore = re.compile('~geohash')
 
 #this is super hacky, find a way to fix it
 reply = "Not Set"
 
-def flickr(tag):
-    rickroll = False
-    if random.randint(0,9) == 9:
-        rickroll = True
-    return getitem("http://api.flickr.com/services/feeds/photos_public.gne?tags=%s&lang=en-us&format=rss_200" % tag, rickroll)
 
-def wtf():
-    choices = ['http://strangeweirdporn.com/feed/', 'http://www.scarysextoyfriday.com/feeds/posts/default', 'http://www.efukt.com/rss.php', 'http://fuckeduppornsites.com/feed/']
-    rickroll = False
-    if random.randint(0,9) == 9:
-        rickroll = True    
-    return getitem(choices[random.randint(0, len(choices) -1)], rickroll)
-
-def weather():
-    montreal_url = "http://www.weatheroffice.gc.ca/rss/city/qc-147_e.xml"
-    feed = feedparser.parse(montreal_url)
-    result = feed['entries'][1]['title']
-    result = result + ". Bitches"
-    return result.replace(u'\xb0', ' ')
-
-def fuckingweather(location="montreal", celcius="yes"):
-    data = urllib.urlopen('http://thefuckingweather.com/?zipcode=%s&CELSIUS=%s' % (location, celcius))
-    soup = BeautifulSoup.BeautifulSoup(data.read())
-    data.close()
-    result = soup.find('div', 'large')
-    if result is not None:
-        return result.contents[0].replace("&deg;", " ") + " " + result.contents[4]
-    else:
-        return "Oww.. my poor kitty brain"
-
-def parse(msg):
-    if wtfre.match(msg) is not None:
-        return wtf()
-    if kittyre.match(msg) is not None:
-        return flickr('kitty')
-    if kittensre.match(msg) is not None:
-        return flickr('kitty')
-    m = tagre.match(msg)
-    if m is not None:
-        return flickr(m.group(1))
-    if weatherre.match(msg) is not None:
-        return weather()
-    if fweatherre.match(msg) is not None:
-        return fuckingweather()
-    m = fweatherre2.match(msg)
-    if m is not None:
-        return fuckingweather(m.group(1))
-    m = geore.match(msg)
-    if m is not None:
-        return geohash()
-    return ""
-    
-def removeNonAscii(s): return "".join(i for i in s if ord(i)<128)
+def parse(msg, sender, connection):
+    for command in commands.registered:
+        result = command.execute(msg, sender, connection)
+        if result is not None:
+            return result
+    return None
 
 # IRC related things
 
@@ -111,6 +57,7 @@ def pubmsg(connection, event):
     message = event.arguments()[0]
     m = locatere.match(message)
     if m is not None:
+        print "locating..."
         reply = event.target()
         a = connection.whois([m.group(1)])
     elif message == "!halp":
@@ -125,8 +72,8 @@ def pubmsg(connection, event):
         else:
             say("har har nice try")
     else:
-        reply = parse(message)
-        if reply != "":
+        reply = parse(message, event.source(), connection)
+        if reply is not None:
             say(reply)
         
 def privmsg(connection, event):
@@ -168,14 +115,8 @@ def main ():
         server.privmsg("NickServ", "identify " + nickservpwd)
     for channel in channels:
         server.join(channel)
-        tosend = flickr('kitty')
-        print(tosend)
-        server.privmsg(channel, tosend)
     irc.process_forever()
 
 
 if __name__ == '__main__':
     main()
-
-
-

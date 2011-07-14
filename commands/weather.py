@@ -8,12 +8,15 @@ class weather(commands.Command):
         """override if desired"""
 
     def execute(self, message, sender, connection):
-        montreal_url = "http://www.weatheroffice.gc.ca/rss/city/qc-147_e.xml"
-        feed = feedparser.parse(montreal_url)
-        if len(feed['entries']) == 0:
-            return commands.unreachable
-        result = feed['entries'][1]['title']
-        result = result + ". Bitches"
-        return result.replace(u'\xb0', ' ')
+        if message == '!weather':
+            montreal_url = "http://www.weatheroffice.gc.ca/rss/city/qc-147_e.xml"
+            feed = feedparser.parse(montreal_url)
+            if len(feed['entries']) == 0:
+                return commands.unreachable
+            result = feed['entries'][1]['title']
+            result = result + ". Bitches"
+            return result.replace(u'\xb0', ' ')
+        else:
+            return None
 
 commands.registered.append(weather())
