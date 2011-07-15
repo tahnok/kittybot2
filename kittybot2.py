@@ -7,6 +7,7 @@ TODO: random kitties every hour
 TODO: geohash!
 TODO: fix weather to take farhenhite
 TODO: mouthpiece mode
+TODO Kitties on startup
 """
 
 import irclib
@@ -38,6 +39,7 @@ def parse(msg, sender, connection):
         result = command.execute(msg, sender, connection)
         if result is not None:
             return result
+    print "No match for " + msg
     return None
 
 # IRC related things
@@ -55,6 +57,7 @@ def pubmsg(connection, event):
         connection.privmsg(event.target(), msg)
     #This is where the parsing / magic happens
     message = event.arguments()[0]
+    print message
     m = locatere.match(message)
     if m is not None:
         print "locating..."
@@ -78,7 +81,6 @@ def pubmsg(connection, event):
         
 def privmsg(connection, event):
     print("it's a private msg!")
-    connection.privmsg(event.target, parse(event.arguments()[0]))
 
 def bounce(connection, event):
     connection.join(event.target())
