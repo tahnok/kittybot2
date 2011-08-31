@@ -88,22 +88,28 @@ def bounce(connection, event):
 def handlewho(connection, event):
     print("whois handler")
     global reply
-    ip = event.arguments()[2]
-    m = re.match('\\w+/', ip)
-    if m is not None:
-        msg = "Error: User has a hostmask"
-    else:
-        m = re.match('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$', ip) 
-        if m is None:
-            ip = socket.gethostbyname(ip)
-        root = etree.parse('http://api.ipinfodb.com/v2/ip_query.php?key=' + ipinfodbkey + '&ip=' + ip + '&timezone=false').getroot()
-        lon = root.find("Longitude").text
-        lat = root.find("Latitude").text
-        city = root.find("City").text
-        long_url = "http://maps.google.com/maps?f=d&source=s_d&saddr=%s,%s" % (lat, lon)
-        short_url = urlshortener.shorten(long_url)
-        msg = "City: %s. Map: %s" % (city, short_url)
+    try:
+        ip = event.arguments()[2]
+        m = re.match('\\w+/', ip)
+        if m is not None:
+            msg = "Error: User has a hostmask"
+        else:
+            m = re.match('^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$', ip) 
+            if m is None:
+                ip = socket.gethostbyname(ip)
+            root = etree.parse('http://api.ipinfodb.com/v2/ip_query.php?key=' + ipinfodbkey + '&ip=' + ip + '&timezone=false').getroot()
+            lon = root.find("Longitude").text
+            lat = root.find("Latitude").text
+            city = root.find("City").text
+            long_url = "http://maps.google.com/maps?f=d&source=s_d&saddr=%s,%s" % (lat, lon)
+            short_url = urlshortener.shorten(long_url)
+            msg = "City: %s. Map: %s" % (city, short_url)
+    except:
+        msg = "DAMN YOU MITHORIUM"
     connection.privmsg(reply, msg)
+
+def handledisconnect(connection, event):
+    print ("disconencted")
 
 def main ():
     irc = irclib.IRC()
@@ -111,13 +117,16 @@ def main ():
     irc.add_global_handler('pubmsg', pubmsg)
     irc.add_global_handler('whoisuser', handlewho)
     irc.add_global_handler('kick', bounce)
+    irc.add_global_handler('disconnect', debug)
+    irc.add_global_handler('error', debug)
+
     server = irc.server()
     server.connect(network, port, nick, ircname=name)
     if freenode:
         server.privmsg("NickServ", "identify " + nickservpwd)
     for channel in channels:
         server.join(channel)
-    irc.process_forever()
+    irc.process_forever(0.5)
 
 
 if __name__ == '__main__':
