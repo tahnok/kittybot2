@@ -15,10 +15,10 @@ class wtf(commands.Command):
             return None
 
     def wtf(self):
-        choices = ['http://strangeweirdporn.com/feed/', 'http://www.scarysextoyfriday.com/feeds/posts/default', 'http://www.efukt.com/rss.php', 'http://fuckeduppornsites.com/feed/']
+        choices = ['http://strangeweirdporn.com/feed/', 'http://www.scarysextoyfriday.com/feeds/posts/default']
         rickroll = False
-        if random.randint(0,9) == 9:
-            rickroll = True    
+        if random.randint(0,9) == 9: 
+            rickroll = True
         return rss.getitem(choices[random.randint(0, len(choices) -1)], rickroll)
 
 commands.registered.append(wtf())
